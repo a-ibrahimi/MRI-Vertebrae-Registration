@@ -1,12 +1,16 @@
 import os
 import SimpleITK as sitk
-from utils.helpers import get_fnumber
+from utils import get_fnumber
+import nibabel as nib
+from BIDS import to_nii
+import numpy as np
 
 
 class MRIProcessor:
-    def __init__(self, preprocessed_dir, data_dir='/local_ssd/practical_wise24/vertebra_labeling/data'):
+    def __init__(self, preprocessed_dir, data_dir='/local_ssd/practical_wise24/vertebra_labeling/data', desired_orientation = ('L', 'P', 'S')):
         self.data_dir = data_dir
         self.preprocessed_dir = preprocessed_dir
+        self.desired_orientation = desired_orientation
 
     def preprocess_data(self):
         for subject_dir in os.listdir(os.path.join(self.data_dir, 'spider_raw')):
@@ -16,9 +20,15 @@ class MRIProcessor:
                 nii_files = [file for file in os.listdir(subject_path) if file.endswith('.nii.gz')]
 
                 if len(nii_files) > 0:
+                    temp = nib.load(os.path.join(subject_path, nii_files[0]))
                     img = self.correct_bias(os.path.join(subject_path, nii_files[0]))
                     normalized = self.normalize(img)
-                    sitk.WriteImage(normalized, f'{self.preprocessed_dir}/file{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
+                    # sitk.WriteImage(normalized, f'{self.preprocessed_dir}/file{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
+                    np_img = sitk.GetArrayFromImage(normalized)
+                    nifti_image = nib.Nifti1Image(np_img, affine=temp.affine)
+                    nii_img = to_nii(nifti_image, seg=False).rescale_and_reorient(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
+                    nib.save(nii_img.nii, f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
+                    
 
     @staticmethod
     def correct_bias(raw_img_path, shrinkFactor = 1):
