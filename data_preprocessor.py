@@ -25,6 +25,10 @@ class MRIProcessor:
                     normalized = self.normalize(img)
                     # sitk.WriteImage(normalized, f'{self.preprocessed_dir}/file{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
                     np_img = sitk.GetArrayFromImage(normalized)
+                    
+                    #TO-DO: Should the min max normalization be done instance wise or not?
+                    np_img = (np_img - np.min(np_img)) / (np.max(np_img) - np.min(np_img))
+                    
                     nifti_image = nib.Nifti1Image(np_img, affine=temp.affine)
                     nii_img = to_nii(nifti_image, seg=False).rescale_and_reorient(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
                     nib.save(nii_img.nii, f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
