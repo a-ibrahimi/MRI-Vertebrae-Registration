@@ -12,44 +12,58 @@ The development of this project was divided into several key phases:
 
 ### Literature Review
 
-The initial phase involved an extensive literature review to understand the current landscape of image registration techniques, specifically within the context of MRI scans.
+    The initial phase involved an extensive literature review to understand the current landscape of image registration techniques, specifically within the context of MRI scans.
 
 ### Baseline Model with VoxelMorph
 
-We began by implementing a baseline model using VoxelMorph for intra T1w MRI scans registration. This served as the foundation for further enhancements.
+    We began by implementing a baseline model using VoxelMorph for intra T1w MRI scans registration. This served as the foundation for further enhancements.
 
 ### Preprocessing Pipeline
 
-Prior to model development, a robust preprocessing pipeline was crucial. This included techniques to prepare and preprocess MRI scans, ensuring optimal input for subsequent registration models.
+    Prior to model development, a robust preprocessing pipeline was crucial. This included techniques to prepare and preprocess MRI scans, ensuring optimal input for subsequent registration models.
 
 ### Model Progression
 
-The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance.
+    The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance.
 
 #### Semisupervised Learning
 
-We explored semisupervised learning by incorporating segmentation masks of the vertebrae. This approach leverages additional information to improve the model's understanding of the registration task.
+    We explored semisupervised learning by incorporating segmentation masks of the vertebrae. This approach leverages additional information to improve the model's understanding of the registration task.
 
 #### Affine Transformations
 
-To further improve results, we implemented affine transformations. This involved aligning moving and fixed images using transformation matrices, enhancing the overall registration process.
+    To further improve results, we implemented affine transformations. This involved aligning moving and fixed images using transformation matrices, enhancing the overall registration process.
 
 #### Region of Interest (ROI) Experimentation
 
-In an experimental phase, we focused on using only the Region of Interest (ROI) by identifying the maximum minimum bounding box. This exploration aimed to understand the impact of limiting the registration process to specific regions.
+    In an experimental phase, we focused on using only the Region of Interest (ROI) by identifying the maximum minimum bounding box. This exploration aimed to understand the impact of limiting the registration process to specific regions.
 
-### Still a Work in Progress...
+### Still a Work in Progress... 
 
-Currently expermenting with spatially-variant and adaptive regularization.
+    Currently expermenting with spatially-variant and adaptive regularization.
 
 ## Requirements
 
-To be able to run the project, you need first to create a conda environment and run the following commands
+To run the project, follow these steps:
 
-```bash
-conda install -c simpleitk -c anaconda -c conda-forge nibabel jupyter simpleitk pillow pyparsing matplotlib
-pip install requirements.txt
-```
+1. **Create a Conda Environment**:
+
+    ```bash
+    conda create --name your_environment_name python=3.8
+    conda activate your_environment_name
+    ```
+
+2. **Install Dependencies**:
+
+    ```bash
+    conda install -c simpleitk -c anaconda -c conda-forge nibabel jupyter simpleitk pillow pyparsing matplotlib
+    ```
+
+3. **Install Python Requirements**:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Folder Structure
 
@@ -73,35 +87,36 @@ pip install requirements.txt
     └── tensorboard
 ```
 
-### BIDS
+### BIDS 📁
 
-A multi-functional package to handle any sort of bids-conform dataset (CT, MRI, ...) It can find, filter, search any BIDS_Family and subjects, and has many functionalities. For more info, check [BIDS README](BIDS/README.md).
+The `BIDS` directory is a versatile package designed to handle BIDS-conform datasets, including CT, MRI, etc. It provides functions for finding, filtering, and searching BIDS families and subjects. For more details, refer to the [BIDS README](BIDS/README.md).
 
-### Voxelmorph
+### Voxelmorph 📁
 
-The voxelmoprh folder encapsulates tools and subfolders related to working with the voxelmorph model.
+The `voxelmorph` folder encapsulates tools and subfolders related to working with the Voxelmorph model.
 
-- `generators.py`: Provides a list of data generators that can be used to generate data in the right format for voxelmorph models
+- **`generators.py`**: This module provides a list of data generators that can generate data in the correct format for Voxelmorph models.
 
-- `scripts`: Provides a list of script files to train and test different voxelmorph models
+- **`scripts`**: Contains script files for training and testing various Voxelmorph models.
 
-- `tensorboard`: A folder to store tensorboard logs of losses and evaluation metrics which you can later visualize using tensorboard commands
+- **`tensorboard`**: A directory to store TensorBoard logs of losses and evaluation metrics, which can be visualized later using TensorBoard commands.
 
-- `modelweights`: A folder to store model weights
+- **`model_weights`**: A directory to store model weights.
 
-### utils
+### Utils 📁
 
-The utils folder is for functionalities that are helpful when working in this project
+The `utils` folder contains functionalities that are useful when working on this project.
 
-- `helpers.py`: defines a list of methods which can be used for visualizing scans, file handling, etc...
+- **`helpers.py`**: Defines a set of methods for tasks such as visualizing scans, file handling, etc.
 
-### data
+### Data 📁
 
-A folder to store data.
+The `data` directory is intended to store dataset-related files.
 
 ### MRIProcessor.py
 
-Defines a class `MRIProcessor` for preprocessing `.nii.gz` files
+Defines a class `MRIProcessor` for preprocessing `.nii.gz` files.
+
 
 ## Project Reference
 
