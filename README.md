@@ -12,35 +12,35 @@ The development of this project was divided into several key phases:
 
 ### Literature Review
 
-    The initial phase involved an extensive literature review to understand the current landscape of image registration techniques, specifically within the context of MRI scans.
+The initial phase involved an extensive literature review to understand the current landscape of image registration techniques, specifically within the context of MRI scans.
 
 ### Baseline Model with VoxelMorph
 
-    We began by implementing a baseline model using VoxelMorph for intra T1w MRI scans registration. This served as the foundation for further enhancements.
+We began by implementing a baseline model using VoxelMorph for intra T1w MRI scans registration. This served as the foundation for further enhancements.
 
 ### Preprocessing Pipeline
 
-    Prior to model development, a robust preprocessing pipeline was crucial. This included techniques to prepare and preprocess MRI scans, ensuring optimal input for subsequent registration models.
+Prior to model development, a robust preprocessing pipeline was crucial. This included techniques to prepare and preprocess MRI scans, ensuring optimal input for subsequent registration models.
 
 ### Model Progression
 
-    The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance.
+The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance.
 
 #### Semisupervised Learning
 
-    We explored semisupervised learning by incorporating segmentation masks of the vertebrae. This approach leverages additional information to improve the model's understanding of the registration task.
+We explored semisupervised learning by incorporating segmentation masks of the vertebrae. This approach leverages additional information to improve the model's understanding of the registration task.
 
 #### Affine Transformations
 
-    To further improve results, we implemented affine transformations. This involved aligning moving and fixed images using transformation matrices, enhancing the overall registration process.
+To further improve results, we implemented affine transformations. This involved aligning moving and fixed images using transformation matrices, enhancing the overall registration process.
 
 #### Region of Interest (ROI) Experimentation
 
-    In an experimental phase, we focused on using only the Region of Interest (ROI) by identifying the maximum minimum bounding box. This exploration aimed to understand the impact of limiting the registration process to specific regions.
+In an experimental phase, we focused on using only the Region of Interest (ROI) by identifying the maximum minimum bounding box. This exploration aimed to understand the impact of limiting the registration process to specific regions.
 
 ### Still a Work in Progress... 
 
-    Currently expermenting with spatially-variant and adaptive regularization.
+Currently expermenting with spatially-variant and adaptive regularization.
 
 ## Requirements
 
@@ -116,7 +116,6 @@ The `data` directory is intended to store dataset-related files.
 ### MRIProcessor.py
 
 Defines a class `MRIProcessor` for preprocessing `.nii.gz` files.
-
 
 ## Project Reference
 
