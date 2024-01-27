@@ -95,11 +95,11 @@ The utils folder is for functionalities that are helpful when working in this pr
 
 - `helpers.py`: defines a list of methods which can be used for visualizing scans, file handling, etc...
 
-#### data
+### data
 
 A folder to store data.
 
-### `MRIProcessor.py`
+### MRIProcessor.py
 
 Defines a class `MRIProcessor` for preprocessing `.nii.gz` files
 
