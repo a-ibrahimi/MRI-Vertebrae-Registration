@@ -4,13 +4,21 @@ from utils import get_fnumber
 import nibabel as nib
 from BIDS import to_nii
 import numpy as np
+import configparser
 
 
 class MRIProcessor:
-    def __init__(self, preprocessed_dir, data_dir='/local_ssd/practical_wise24/vertebra_labeling/data', desired_orientation = ('L', 'P', 'S')):
-        self.data_dir = data_dir
-        self.preprocessed_dir = preprocessed_dir
-        self.desired_orientation = desired_orientation
+    def __init__(self, config_path='config.ini'):
+        # Load configuration from file
+        self.config = configparser.ConfigParser()
+        self.config.read(config_path)
+
+        # Set parameters from the configuration
+        self.data_dir = self.config['Paths']['data_dir']
+        self.preprocessed_dir = self.config['Paths']['preprocessed_dir']
+        self.desired_orientation = tuple(self.config['PreprocessingParameters']['desired_orientation'].split(','))
+        self.shrink_factor = int(self.config['PreprocessingParameters']['shrink_factor'])
+        self.template_img_path = self.config['PreprocessingParameters']['template_img_path']
 
     def preprocess_data(self):
         for subject_dir in os.listdir(os.path.join(self.data_dir, 'spider_raw')):
@@ -34,8 +42,7 @@ class MRIProcessor:
                     nib.save(nii_img.nii, f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
                     
 
-    @staticmethod
-    def correct_bias(raw_img_path, shrinkFactor = 1):
+    def correct_bias(self, raw_img_path):
         print('Reading Image...')
         raw_img_sitk = sitk.ReadImage(raw_img_path, sitk.sitkFloat32)
         raw_img_sitk = sitk.DICOMOrient(raw_img_sitk, 'LPS')
@@ -47,8 +54,8 @@ class MRIProcessor:
         head_mask = transformed
         inputImage = raw_img_sitk
 
-        inputImage = sitk.Shrink(raw_img_sitk, [shrinkFactor] * inputImage.GetDimension())
-        maskImage = sitk.Shrink(head_mask, [shrinkFactor] * inputImage.GetDimension())
+        inputImage = sitk.Shrink(raw_img_sitk, [self.shrink_factor] * inputImage.GetDimension())
+        maskImage = sitk.Shrink(head_mask, [self.shrink_factor] * inputImage.GetDimension())
 
         bias_corrector = sitk.N4BiasFieldCorrectionImageFilter()
 
@@ -59,10 +66,9 @@ class MRIProcessor:
 
         return corrected_image_full_resolution
 
-    @staticmethod
-    def normalize(img, template_img_path = '/local_ssd/practical_wise24/vertebra_labeling/data/spider_raw/sub-0083/T1w/sub-0083_T1w.nii.gz'):
+    def normalize(self, img):
 
-        template_img_sitk = sitk.ReadImage(template_img_path, sitk.sitkFloat64)
+        template_img_sitk = sitk.ReadImage(self.template_img_path, sitk.sitkFloat64)
         template_img_sitk = sitk.DICOMOrient(template_img_sitk, 'LPS')
 
         transformed = sitk.HistogramMatching(img, template_img_sitk)
