@@ -16,8 +16,8 @@ class MRIProcessor:
         # Set parameters from the configuration
         self.data_dir = self.config['Paths']['data_dir']
         self.preprocessed_dir = self.config['Paths']['preprocessed_dir']
-        self.desired_orientation = tuple(self.config['PreprocessingParameters']['desired_orientation'].split())
-        self.shrink_factor = float(self.config['PreprocessingParameters']['shrink_factor'])
+        self.desired_orientation = tuple(self.config['PreprocessingParameters']['desired_orientation'].split(','))
+        self.shrink_factor = int(self.config['PreprocessingParameters']['shrink_factor'])
         self.template_img_path = self.config['PreprocessingParameters']['template_img_path']
 
     def preprocess_data(self):
@@ -42,7 +42,6 @@ class MRIProcessor:
                     nib.save(nii_img.nii, f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
                     
 
-    @staticmethod
     def correct_bias(self, raw_img_path):
         print('Reading Image...')
         raw_img_sitk = sitk.ReadImage(raw_img_path, sitk.sitkFloat32)
@@ -55,8 +54,8 @@ class MRIProcessor:
         head_mask = transformed
         inputImage = raw_img_sitk
 
-        inputImage = sitk.Shrink(raw_img_sitk, [self.shrinkFactor] * inputImage.GetDimension())
-        maskImage = sitk.Shrink(head_mask, [self.shrinkFactor] * inputImage.GetDimension())
+        inputImage = sitk.Shrink(raw_img_sitk, [self.shrink_factor] * inputImage.GetDimension())
+        maskImage = sitk.Shrink(head_mask, [self.shrink_factor] * inputImage.GetDimension())
 
         bias_corrector = sitk.N4BiasFieldCorrectionImageFilter()
 
@@ -67,7 +66,6 @@ class MRIProcessor:
 
         return corrected_image_full_resolution
 
-    @staticmethod
     def normalize(self, img):
 
         template_img_sitk = sitk.ReadImage(self.template_img_path, sitk.sitkFloat64)
