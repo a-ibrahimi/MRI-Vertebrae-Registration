@@ -11,28 +11,37 @@ from generators import *
 from voxelmorph.tf.networks import VxmDense, VxmDenseSemiSupervisedSeg
 import voxelmorph as vxm
 
+import configparser
+
 if __name__ == '__main__':
+    
+    config_path = 'config.ini'
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    
+    training_params = config['Semi3DTrainingParameters']
+    
     # Parsing command line arguments
     parser = argparse.ArgumentParser(description='Process model parameters.')
-    parser.add_argument('--slice_number', type=int, default=196, help='Number for generate_2d_slices function')
-    parser.add_argument('--batch_size', type=int, default=16, help='Batch size for data generators')
-    parser.add_argument('--test_size_1', type=float, default=0.2, help='First test size for splitting data')
-    parser.add_argument('--test_size_2', type=float, default=0.5, help='Second test size for splitting data')
-    parser.add_argument('--int_steps', type=int, default=0, help='Integration steps for VxmDense model')
-    parser.add_argument('--lambda_param', type=float, default=0.02, help='Lambda parameter for loss weights')
-    parser.add_argument('--steps_per_epoch', type=int, default=100, help='Steps per epoch during training')
-    parser.add_argument('--nb_epochs', type=int, default=32, help='Number of epochs for training')
-    parser.add_argument('--verbose', type=int, default=2, help='Verbose mode')
-    parser.add_argument('--weights_path', type=str, default='voxelmorph/model_weights/weights.h5', help='Path to save model weights')
-    parser.add_argument('--loss', type=str, default='MSE', help='Type of loss function')
-    parser.add_argument('--grad_norm_type', type=str, choices=['l1', 'l2'], default='l2', help='Type of norm for Grad loss (l1 or l2)')
-    parser.add_argument('--batch_number', type=int, default=4, help='')
-    parser.add_argument('--gamma_param', type=float, default=0.01, help='weight of dice loss (gamma) (default: 0.01)')
-    parser.add_argument('--learning_rate', type=float, default=0.0001, help='Learning rate (default: 0.0001)')
-    parser.add_argument('--images_path', type=str, default='/local_ssd/practical_wise24/image_registration/ibra/data/images1.npy', help='Path to npy file containing the MRI scans as numpy array')
-    parser.add_argument('--segmentations_path', type=str, default='/local_ssd/practical_wise24/image_registration/ibra/data/segmentations1.npy', help='Path to npy file containing the segmentation masks as numpy array')
-    parser.add_argument('--labels', type=str, default='data/labels.npy', help='label list (npy format) to use in dice loss')
-    parser.add_argument('--patience', type=int, default=60, help='Number of epochs with no improvement in validation performance after which training will be stopped.')
+    parser.add_argument('--slice_number', type=int, default=int(training_params['slice_number']), help='Number for generate_2d_slices function')
+    parser.add_argument('--batch_size', type=int, default=int(training_params['batch_size']), help='Batch size for data generators')
+    parser.add_argument('--test_size_1', type=float, default=float(training_params['test_size_1']), help='First test size for splitting data')
+    parser.add_argument('--test_size_2', type=float, default=float(training_params['test_size_2']), help='Second test size for splitting data')
+    parser.add_argument('--int_steps', type=int, default=int(training_params['int_steps']), help='Integration steps for VxmDense model')
+    parser.add_argument('--lambda_param', type=float, default=float(training_params['lambda_param']), help='Lambda parameter for loss weights')
+    parser.add_argument('--steps_per_epoch', type=int, default=int(training_params['steps_per_epoch']), help='Steps per epoch during training')
+    parser.add_argument('--nb_epochs', type=int, default=int(training_params['nb_epochs']), help='Number of epochs for training')
+    parser.add_argument('--verbose', type=int, default=int(training_params['verbose']), help='Verbose mode')
+    parser.add_argument('--weights_path', type=str, default=training_params['weights_path'], help='Path to save model weights')
+    parser.add_argument('--loss', type=str, default=training_params['loss'], help='Type of loss function')
+    parser.add_argument('--grad_norm_type', type=str, choices=['l1', 'l2'], default=training_params['grad_norm_type'], help='Type of norm for Grad loss (l1 or l2)')
+    parser.add_argument('--batch_number', type=int, default=int(training_params['batch_number']), help='')
+    parser.add_argument('--gamma_param', type=float, default=float(training_params['gamma_param']), help='weight of dice loss (gamma) (default: 0.01)')
+    parser.add_argument('--learning_rate', type=float, default=float(training_params['learning_rate']), help='Learning rate (default: 0.0001)')
+    parser.add_argument('--images_path', type=str, default=training_params['images_path'], help='Path to npy file containing the MRI scans as numpy array')
+    parser.add_argument('--segmentations_path', type=str, default=training_params['segmentations_path'], help='Path to npy file containing the segmentation masks as numpy array')
+    parser.add_argument('--labels', type=str, default=training_params['labels'], help='label list (npy format) to use in dice loss')
+    parser.add_argument('--patience', type=int, default=int(training_params['patience']), help='Number of epochs with no improvement in validation performance after which training will be stopped.')
 
 
     args = parser.parse_args()
