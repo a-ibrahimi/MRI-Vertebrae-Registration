@@ -72,7 +72,8 @@ To run the project, follow these steps:
 ├── BIDS
 ├── README.md
 ├── data
-│   └── labels.npy
+│   └── preprocessed
+│   └── labels.npy
 ├── MRIProcessor.py
 ├── requirements.txt
 ├── utils
