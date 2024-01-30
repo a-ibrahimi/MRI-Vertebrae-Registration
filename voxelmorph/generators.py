@@ -1,4 +1,5 @@
 import numpy as np
+from affine_transformation import AffineTransformer
 
 def volgen(
     vol_names,
@@ -82,3 +83,83 @@ def semisupervised(vol_names, seg_names, labels, batch_size=16, downsize=1):
         outvols = [trg_vol, zeros, trg_seg]
         
         yield (invols, outvols)
+    
+def semisupervised_affine(vol_names, seg_names, labels, batch_size, downsize):
+
+    affine_transformer = AffineTransformer()
+
+    # configure base generator
+    gen = volgen(vol_names, batch_size, seg_names)
+    zeros = None
+
+    # internal utility to generate downsampled prob seg from discrete seg
+    def split_seg(seg):
+        prob_seg = np.zeros((*seg.shape[:4], len(labels)))
+        for i, label in enumerate(labels):
+            prob_seg[0, ..., i] = (seg[0, ...] == label)
+        return prob_seg[:, ::downsize, ::downsize]
+
+    while True:
+        # load source vol and seg
+        src_vol, src_seg = next(gen)
+        trg_vol, trg_seg = next(gen)
+
+        # calculate affine transformations and transform source vol and seg
+        affine_matrices, _, __ = affine_transformer.calculate_affine_transformations(src_seg, trg_seg)
+        src_vol_tr = affine_transformer.apply_affine_transformations(src_vol, affine_matrices)
+        src_seg_tr = affine_transformer.apply_affine_transformations(src_seg, affine_matrices)
+
+        src_seg_tr = split_seg(src_seg_tr)
+        trg_seg = split_seg(trg_seg)
+
+        vol_shape = src_vol.shape[1:]
+        ndims = len(vol_shape)
+
+        # cache zeros
+        if zeros is None:
+            zeros = np.zeros((batch_size, *vol_shape, ndims))
+                
+        invols = [src_vol_tr, trg_vol, src_seg_tr]
+        outvols = [trg_vol, zeros, trg_seg]
+            
+        yield (invols, outvols)
+    
+def vxm_data_generator_affine(x_data, seg_data=None, batch_size=16):
+
+    affine_transformer = AffineTransformer()
+
+    # preliminary sizing
+    vol_shape = x_data.shape[1:] # extract data shape
+    ndims = len(vol_shape)
+        
+    # prepare a zero array the size of the deformation
+    # we'll explain this below
+    zero_phi = np.zeros([batch_size, *vol_shape, ndims])
+        
+    while True:
+        # prepare inputs:
+        # images need to be of the size [batch_size, H, W, 1]
+        idx1 = np.random.randint(0, x_data.shape[0], size=batch_size)
+        idx2 = np.random.randint(0, x_data.shape[0], size=batch_size)
+
+        moving_images = x_data[idx1, ..., np.newaxis]
+        fixed_images = x_data[idx2, ..., np.newaxis] 
+
+        if seg_data is not None:
+            moving_segs = seg_data[idx1, ..., np.newaxis]
+            fixed_segs = seg_data[idx2, ..., np.newaxis]
+
+            affine_matrices, _, __ = affine_transformer.calculate_affine_transformations(moving_segs, fixed_segs)
+            translated_images = affine_transformer.apply_affine_transformations(moving_images, affine_matrices)
+
+            inputs = [translated_images, fixed_images]
+        else:
+            inputs = [moving_images, fixed_images] 
+            
+        # prepare outputs (the 'true' moved image):
+        # of course, we don't have this, but we know we want to compare 
+        # the resulting moved image with the fixed image. 
+        # we also wish to penalize the deformation field. 
+        outputs = [fixed_images, zero_phi]
+            
+        yield (inputs, outputs)
