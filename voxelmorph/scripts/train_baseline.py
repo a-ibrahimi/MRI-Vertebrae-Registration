@@ -1,24 +1,21 @@
 import os
-import sys
 import argparse
+
 import nibabel as nib
 import neurite as ne
 import voxelmorph as vxm
 from voxelmorph.tf.networks import VxmDense
+
 import numpy as np
 import tensorflow as tf
 from scipy.ndimage import zoom
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-import PIL
-from PIL import Image
-from pathlib import Path
-from pointreg import ridged_from_points, resample
-from BIDS import Centroids, NII
-from BIDS.snapshot2D import Snapshot_Frame, create_snapshot
-from IPython.display import Image
+
 import BIDS
 from BIDS import *
+
+import configparser
 
 def get_orientation(img):
     orientation = nib.aff2axcodes(img.affine)
@@ -114,22 +111,30 @@ def plot_history(hist, loss_name=['loss', 'val_loss']):
     plt.savefig('/u/home/qug/practice/plot/loss.png')
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Process model parameters.')
-    parser.add_argument('--slice_number', type=int, default=196, help='Number for generate_2d_slices function')
-    parser.add_argument('--batch_size', type=int, default=16, help='Batch size for data generators')
-    parser.add_argument('--test_size_1', type=float, default=0.2, help='First test size for splitting data')
-    parser.add_argument('--test_size_2', type=float, default=0.5, help='Second test size for splitting data')
-    parser.add_argument('--int_steps', type=int, default=0, help='Integration steps for VxmDense model')
-    parser.add_argument('--scaled_up', type=bool, default=False, help='Scaled up model')
-    parser.add_argument('--lambda_param', type=float, default=0.05, help='Lambda parameter for loss weights')
-    parser.add_argument('--steps_per_epoch', type=int, default=100, help='Steps per epoch during training')
-    parser.add_argument('--nb_epochs', type=int, default=128, help='Number of epochs for training')
-    parser.add_argument('--verbose', type=int, default=2, help='Verbose mode')
-    parser.add_argument('--weights_path', type=str, default='/u/home/qug/practice/trained_models/vxm_model_weights_mse_scaled_up.h5', help='Path to save model weights')
-    parser.add_argument('--loss', type=str, default='MSE', help='Type of loss function')
-    parser.add_argument('--grad_norm_type', type=str, choices=['l1', 'l2'], default='l2', help='Type of norm for Grad loss (l1 or l2)')
-    parser.add_argument('--batch_number', type=int, default=50, help='Example number for prediction to calculate dice score')
 
+    config_path = 'config.ini'
+    config = configparser.ConfigParser()
+    config.read(config_path)
+
+    training_params = config['2DBaselineTrainingParameters']
+
+    parser = argparse.ArgumentParser(description='Process model parameters.')
+    parser.add_argument('--slice_number', type=int, default=training_params['slice_number'], help='Number for generate_2d_slices function')
+    parser.add_argument('--batch_size', type=int, default=training_params['batch_size'], help='Batch size for data generators')
+    parser.add_argument('--test_size_1', type=float, default=training_params['test_size_1'], help='First test size for splitting data')
+    parser.add_argument('--test_size_2', type=float, default=training_params['test_size_2'], help='Second test size for splitting data')
+    parser.add_argument('--int_steps', type=int, default=training_params['int_steps'], help='Integration steps for VxmDense model')
+    parser.add_argument('--scaled_up', type=bool, default=training_params['scaled_up'], help='Scaled up model')
+    parser.add_argument('--lambda_param', type=float, default=training_params['lambda_param'], help='Lambda parameter for loss weights')
+    parser.add_argument('--steps_per_epoch', type=int, default=training_params['steps_per_epoch'], help='Steps per epoch during training')
+    parser.add_argument('--nb_epochs', type=int, default=training_params['nb_epochs'], help='Number of epochs for training')
+    parser.add_argument('--verbose', type=int, default=training_params['verbose'], help='Verbose mode')
+    parser.add_argument('--weights_path', type=str, default=training_params['weights_path'], help='Path to save model weights')
+    parser.add_argument('--loss', type=str, default=training_params['loss'], help='Type of loss function')
+    parser.add_argument('--grad_norm_type', type=str, choices=training_params['grad_norm_type'], default='l2', help='Type of norm for Grad loss (l1 or l2)')
+    parser.add_argument('--batch_number', type=int, default=training_params['batch_number'], help='Example number for prediction to calculate dice score')
+    parser.add_argument('--demo_path', type=str, default=training_params['demo_path'], help='Path to save demo images')
+    
     args = parser.parse_args()
 
     slices = generate_2d_slices(args.slice_number)
@@ -207,4 +212,4 @@ if __name__ == '__main__':
         images = [img[0, :, :, 0] for img in test_input + test_pred] 
         titles = ['moving', 'fixed', 'moved', 'flow']
         ne.plot.slices(images, titles=titles, cmaps=['gray'], do_colorbars=True)
-        plt.savefig('/u/home/qug/practice/plot/demo_result'+str(i)+'.png')
+        plt.savefig(args.demo_path +str(i)+'.png')
