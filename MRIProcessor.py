@@ -15,7 +15,7 @@ class MRIProcessor:
 
         # Set parameters from the configuration
         self.data_dir = self.config['Paths']['data_dir']
-        self.preprocessed_dir = self.config['Paths']['preprocessed_dir']
+        self.preprocessed_dir = self.config['Paths']['preprocessed_scans_dir']
         self.desired_orientation = tuple(self.config['PreprocessingParameters']['desired_orientation'].split(','))
         self.shrink_factor = int(self.config['PreprocessingParameters']['shrink_factor'])
         self.template_img_path = self.config['PreprocessingParameters']['template_img_path']
