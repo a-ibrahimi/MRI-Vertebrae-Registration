@@ -1,2 +1,4 @@
 # .gitignore
 .vscode/
+BIDS/__pycache__/
+BIDS/*/__pycache__/
