@@ -2,6 +2,31 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## Table of Contents
+
+- [Project Description](#project-description)
+- [Project Structure](#project-structure)
+  - [Literature Review](#literature-review)
+  - [Baseline Model with VoxelMorph](#baseline-model-with-voxelmorph)
+  - [Preprocessing Pipeline](#preprocessing-pipeline)
+  - [Model Progression](#model-progression)
+    - [Semisupervised Learning](#semisupervised-learning)
+    - [Affine Transformations](#affine-transformations)
+    - [Region of Interest (ROI) Experimentation](#region-of-interest-roi-experimentation)
+  - [Still a Work in Progress](#still-a-work-in-progress)
+- [Requirements](#requirements)
+- [Folder Structure](#folder-structure)
+  - [BIDS 📁](#bids-)
+  - [Voxelmorph 📁](#voxelmorph-)
+  - [Utils 📁](#utils-)
+  - [Data 📁](#data-)
+  - [MRIProcessor.py](#mriprocessorpy)
+  - [SegmentationProcessor.py](#segmentationprocessorpy)
+- [Project Team](#project-team)
+- [Project License](#project-license)
+- [Project Acknowledgement](#project-acknowledgement)
+- [Project Contact](#project-contact)
+
 ## Project Description
 
 This repository is dedicated to the exploration and implementation of deep learning models for image registration of vertebrae, as part of the practical class "Advanced Deep Learning in Medicine." The project focuses initially on the application of Voxelmorph to spine MRI and CT scans.
