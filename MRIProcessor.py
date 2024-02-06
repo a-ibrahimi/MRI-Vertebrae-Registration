@@ -28,18 +28,15 @@ class MRIProcessor:
                 nii_files = [file for file in os.listdir(subject_path) if file.endswith('.nii.gz')]
 
                 if len(nii_files) > 0:
-                    temp = nib.load(os.path.join(subject_path, nii_files[0]))
+                    target_file = f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz'
                     img = self.correct_bias(os.path.join(subject_path, nii_files[0]))
                     normalized = self.normalize(img)
-                    # sitk.WriteImage(normalized, f'{self.preprocessed_dir}/file{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
-                    np_img = sitk.GetArrayFromImage(normalized)
+                    sitk.WriteImage(normalized, target_file)
                     
-                    #TO-DO: Should the min max normalization be done instance wise or not?
-                    np_img = (np_img - np.min(np_img)) / (np.max(np_img) - np.min(np_img))
+                    img = nib.load(target_file)
+                    nii_img = to_nii(img, seg=False).rescale_and_reorient(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
                     
-                    nifti_image = nib.Nifti1Image(np_img, affine=temp.affine)
-                    nii_img = to_nii(nifti_image, seg=False).rescale_and_reorient(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
-                    nib.save(nii_img.nii, f'{self.preprocessed_dir}/image{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
+                    nib.save(nii_img.nii, target_file)
                     
 
     def correct_bias(self, raw_img_path):

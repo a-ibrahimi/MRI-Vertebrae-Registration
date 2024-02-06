@@ -25,7 +25,8 @@ class SegmentationProcessor:
                 if len(nii_files) > 0:
 
                     img = nib.load(os.path.join(subject_path, nii_files[0]))
-                    nii_img = to_nii(img, seg=True).rescale_and_reorient_(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
+                    nii_img = to_nii(img, seg=True)
+                    nii_img = nii_img.rescale_and_reorient_(axcodes_to=self.desired_orientation, voxel_spacing=(1,1,1), verbose=True)
                     nib.save(nii_img.nii, f'{self.preprocessed_dir}/segmentation{get_fnumber(os.path.join(subject_path, nii_files[0]))}.nii.gz')
         
         
