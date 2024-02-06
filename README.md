@@ -1,5 +1,7 @@
 # MRI-Vertebrae-Registration
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Project Description
 
 This repository is dedicated to the exploration and implementation of deep learning models for image registration of vertebrae, as part of the practical class "Advanced Deep Learning in Medicine." The project focuses initially on the application of Voxelmorph to spine MRI and CT scans.
@@ -38,7 +40,7 @@ To further improve results, we implemented affine transformations. This involved
 
 In an experimental phase, we focused on using only the Region of Interest (ROI) by identifying the maximum minimum bounding box. This exploration aimed to understand the impact of limiting the registration process to specific regions.
 
-### Still a Work in Progress... 
+### Still a Work in Progress
 
 Currently expermenting with spatially-variant and adaptive regularization.
 
@@ -70,21 +72,37 @@ To run the project, follow these steps:
 ```txt
 .
 ├── BIDS
-├── README.md
-├── data
-│   └── preprocessed
-│   └── labels.npy
 ├── MRIProcessor.py
+├── README.md
+├── SegmentationProcessor.py
+├── config.ini
+├── data
+│   ├── labels.npy
+│   ├── preprocessed
+│   │   ├── scans
+│   │   └── segmentations
+│   └── region_of_interest
+│       ├── scans
+│       └── segmentations
+├── main.py
 ├── requirements.txt
 ├── utils
-│   ├── __init__.py
-│   └── helpers.py
+│   ├── __init__.py
+│   ├── helpers.py
+│   └── scripts
+│       ├── __init__.py
+│       ├── bounding_box_generator.py
+│       ├── hyper_search.sh
+│       └── hyperparameter_search_visualization.py
 └── voxelmorph
     ├── __init__.py
+    ├── affine_transformation.py
     ├── generators.py
     ├── model_weights
     ├── scripts
-    │   └── train_semisupervised_3d.py
+    │   ├── train_baseline.py
+    │   ├── train_semisupervised_3d.py
+    │   └── train_semisupervised_affine_2d.py
     └── tensorboard
 ```
 
@@ -116,14 +134,32 @@ The `data` directory is intended to store dataset-related files.
 
 ### MRIProcessor.py
 
-Defines a class `MRIProcessor` for preprocessing `.nii.gz` files.
+Defines a class `MRIProcessor` for preprocessing `.nii.gz` scan files.
 
-## Project Reference
+### SegmentationProcessor.py
+
+Defines a class `SegmentationProcessor` for preprocessing `.nii.gz` segmentation files.
 
 ## Project Team
 
+**Supervised by:** Robert Graf & Wenqi Huang
+
+**Team Members**
+
+| Name                | LinkedIn                                                  | Email                                      |
+|---------------------|-----------------------------------------------------------|--------------------------------------------|
+| Guangyao Quan       | [![LinkedIn](https://img.icons8.com/color/30/000000/linkedin.png)](https://www.linkedin.com/in/guangyao-quan-216722197/) | [![Email](https://img.icons8.com/color/30/000000/email.png)](mailto:guangyao.quan@tum.de)              |
+| Utku Ipek           | [![LinkedIn](https://img.icons8.com/color/30/000000/linkedin.png)](https://www.linkedin.com/in/utku-ipek/) | [![Email](https://img.icons8.com/color/30/000000/email.png)](mailto:utku.ipek@tum.de)                   |
+| Anass Ibrahimi      | [![LinkedIn](https://img.icons8.com/color/30/000000/linkedin.png)](https://www.linkedin.com/in/anass-ibrahimi-84b87b1bb/) | [![Email](https://img.icons8.com/color/30/000000/email.png)](mailto:anassibrahimi@outlook.com)        |
+
 ## Project License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Project Acknowledgement
 
+Special thanks to our supervisor Robert and Wenqi for their continuous support. We would also like to thank all ADLM tutors from the [AI in Medicine Lab](https://aim-lab.io/) for their insights and guidance.
+
 ## Project Contact
+
+Feel free to connect with us on LinkedIn or to drop us an email for any inquiries. We look forward to hearing from you! 🙂
