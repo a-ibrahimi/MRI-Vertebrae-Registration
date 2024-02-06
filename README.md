@@ -17,7 +17,7 @@
 - [Requirements](#requirements)
 - [Folder Structure](#folder-structure)
   - [BIDS 📁](#bids-)
-  - [Voxelmorph 📁](#voxelmorph-)
+  - [vxlmorph 📁](#vxlmorph-)
   - [Utils 📁](#utils-)
   - [Data 📁](#data-)
   - [MRIProcessor.py](#mriprocessorpy)
@@ -102,7 +102,8 @@ To run the project, follow these steps:
 ├── SegmentationProcessor.py
 ├── config.ini
 ├── data
-│   ├── labels.npy
+│   ├── numpy
+│   │   └── labels.npy
 │   ├── preprocessed
 │   │   ├── scans
 │   │   └── segmentations
@@ -119,7 +120,7 @@ To run the project, follow these steps:
 │       ├── bounding_box_generator.py
 │       ├── hyper_search.sh
 │       └── hyperparameter_search_visualization.py
-└── voxelmorph
+└── vxlmorph
     ├── __init__.py
     ├── affine_transformation.py
     ├── generators.py
@@ -135,9 +136,9 @@ To run the project, follow these steps:
 
 The `BIDS` directory is a versatile package designed to handle BIDS-conform datasets, including CT, MRI, etc. It provides functions for finding, filtering, and searching BIDS families and subjects. For more details, refer to the [BIDS README](BIDS/README.md).
 
-### Voxelmorph 📁
+### vxlmorph 📁
 
-The `voxelmorph` folder encapsulates tools and subfolders related to working with the Voxelmorph model.
+The `vxlmorph` folder encapsulates tools and subfolders related to working with the Voxelmorph model.
 
 - **`generators.py`**: This module provides a list of data generators that can generate data in the correct format for Voxelmorph models.
 
