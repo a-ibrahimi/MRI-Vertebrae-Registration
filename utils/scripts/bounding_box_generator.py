@@ -1,11 +1,10 @@
 import numpy as np
 import os
-from BIDS import *
 import configparser
 import nibabel as nib
 
 def get_file_number(path):
-    return path.split('/')[-1][-11, -7] #workes with the naming convention used when saving files by MRIProcessor or SegmentationProcessor (path/to/file/file000x.nii.gz)
+    return path.split('/')[-1][-11: -7] #workes with the naming convention used when saving files by MRIProcessor or SegmentationProcessor (path/to/file/file000x.nii.gz)
 
 def find_bounding_box(segmentation_data):
     # Find indices where the segmentation mask is non-zero
@@ -18,6 +17,7 @@ def find_bounding_box(segmentation_data):
     return min_coords, max_coords
 
 if __name__ == '__main__':
+    
     
     config = configparser.ConfigParser()
     config.read('config.ini')
@@ -80,4 +80,4 @@ if __name__ == '__main__':
         final_seg = nib.Nifti1Image(final_seg, affine = np.eye(4))
         
         nib.save(final_img, os.path.join(ROI_scans_dir, img_file))
-        nib.save(final_seg, os.path.join(ROI_seg_dir, seg_file))      
+        nib.save(final_seg, os.path.join(ROI_seg_dir, seg_file))    
