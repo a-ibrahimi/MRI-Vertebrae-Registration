@@ -108,7 +108,6 @@ def plot_history(hist, loss_name=['loss', 'val_loss']):
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.show()
-    plt.savefig('/u/home/qug/practice/plot/loss.png')
 
 if __name__ == '__main__':
 
@@ -116,6 +115,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read(config_path)
 
+    # Get training parameters from config file
     training_params = config['2DBaselineTrainingParameters']
 
     parser = argparse.ArgumentParser(description='Process model parameters.')
@@ -137,16 +137,20 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
+    # Generate 2D slices from the dataset
     slices = generate_2d_slices(args.slice_number)
     resampled_slices = resample((256, 256), slices)
 
+    # Split the data into training, validation, and test sets
     x_train, x_other = train_test_split(resampled_slices, test_size=args.test_size_1, random_state=42)
     x_test, x_val = train_test_split(x_other, test_size=args.test_size_2, random_state=42)
 
+    # Create data generators
     train_gen = vxm_data_generator(x_train, batch_size=args.batch_size)
     val_gen = vxm_data_generator(x_val, batch_size=args.batch_size)
     test_gen = vxm_data_generator(x_test, batch_size=args.batch_size)
 
+    # Create VxmDense model
     if args.scaled_up == False:
         nf_enc=[16,32,32,32]
         nf_dec=[32,32,32,32,32,16,16,3]
@@ -157,6 +161,7 @@ if __name__ == '__main__':
     inshape = resampled_slices.shape[1:]
     vxm_model = VxmDense(inshape, nb_features, int_steps=args.int_steps)
 
+    # Compile and train the model
     if args.loss == 'MSE':
         loss_func = vxm.losses.MSE().loss
     elif args.loss == 'NCC':
@@ -184,15 +189,19 @@ if __name__ == '__main__':
     print('Training model...')
     vxm_model.fit(train_gen, steps_per_epoch=args.steps_per_epoch, epochs=args.nb_epochs, validation_data=val_gen, validation_steps=args.steps_per_epoch, verbose=args.verbose)
 
+    # Plot history
     print('Plotting history...')
     plot_history(vxm_model.history)
 
+    # Save model weights
     print('Saving model...')
     vxm_model.save_weights(args.weights_path)
 
+    # Evaluate model
     print('Evaluating model...')
     vxm_model.evaluate(test_gen, steps=args.steps_per_epoch, verbose=args.verbose)
 
+    # Predict model
     print('Predicting model...')
     dice_scores = []
     for i in range(args.batch_number):
@@ -205,6 +214,7 @@ if __name__ == '__main__':
     average_dice_score = np.mean(dice_scores)
     print('Average dice score: ', average_dice_score)
 
+    # Demonstrate on a sample image
     print('Demonstrating on a sample image...')
     for i in range(10):
         test_input, _ = next(test_gen)
