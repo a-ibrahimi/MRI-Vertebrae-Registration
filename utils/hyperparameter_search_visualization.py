@@ -33,17 +33,21 @@ def visualize_hyperparameters(file_path):
 
     df = pd.DataFrame(data)
 
+    # Find the point with the lowest Average Dice Score
     min_dice_row = df.loc[df['Average Dice Score'].idxmin()]
 
+    # Visualization
     plt.figure(figsize=(18, 6))
 
+    # Lambda vs. Average Dice Score
     plt.subplot(1, 3, 1)
     sns.scatterplot(data=df, x='Lambda', y='Average Dice Score', hue='Loss')
-    plt.scatter(min_dice_row['Lambda'], min_dice_row['Average Dice Score'], color='red', marker='*', s=100)
-    plt.text(min_dice_row['Lambda'], min_dice_row['Average Dice Score'], f" {min_dice_row['Loss']}", color='red') 
+    plt.scatter(min_dice_row['Lambda'], min_dice_row['Average Dice Score'], color='red', marker='*', s=100) # Highlighting with star
+    plt.text(min_dice_row['Lambda'], min_dice_row['Average Dice Score'], f" {min_dice_row['Loss']}", color='red') # Labeling Loss function
     plt.title('Lambda vs. Average Dice Score')
-    plt.grid(True)  
+    plt.grid(True) # Adding grid lines
 
+    # Gamma vs. Average Dice Score
     plt.subplot(1, 3, 2)
     sns.scatterplot(data=df, x='Gamma', y='Average Dice Score', hue='Loss')
     plt.scatter(min_dice_row['Gamma'], min_dice_row['Average Dice Score'], color='red', marker='*', s=100) 
@@ -51,6 +55,7 @@ def visualize_hyperparameters(file_path):
     plt.title('Gamma vs. Average Dice Score')
     plt.grid(True) 
 
+    # Learning Rate vs. Average Dice Score
     plt.subplot(1, 3, 3)
     sns.scatterplot(data=df, x='Learning Rate', y='Average Dice Score', hue='Loss')
     plt.scatter(min_dice_row['Learning Rate'], min_dice_row['Average Dice Score'], color='red', marker='*', s=100) 
