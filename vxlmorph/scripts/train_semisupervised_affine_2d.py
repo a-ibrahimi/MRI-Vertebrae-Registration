@@ -111,7 +111,7 @@ if __name__ == '__main__':
     # compile model
     print('Compiling model...')
     with tf.device('/GPU:0'):
-        log_dir = "voxelmorph/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = "vxlmorph/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         early_stopping = EarlyStopping(monitor='val_loss', patience = 60, restore_best_weights=True)
         vxm_model.compile(tf.keras.optimizers.Adam(learning_rate=args.learning_rate), loss=losses, loss_weights=loss_weights)
@@ -131,15 +131,15 @@ if __name__ == '__main__':
             test_input, _ = next(test_gen)
 
             #Save input as npy
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_input/Moving/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[0])
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_input/Fixed/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[1])
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_input/Moving_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[2])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Moving/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[0])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Fixed/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[1])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Moving_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[2])
             test_pred = vxm_model.predict(test_input, verbose=args.verbose)
             
             #Save output as npy
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_output/Moved/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[0])
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_output/Field/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[1])
-            np.save(f'voxelmorph/tensorboard/Semisupervised/Evaluation_output/Fixed_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[2])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Moved/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[0])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Field/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[1])
+            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Fixed_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[2])
             
             test_input = tf.convert_to_tensor(test_input[1], dtype=tf.float32)
             test_pred = tf.convert_to_tensor(test_pred[0], dtype=tf.float32)
@@ -149,6 +149,6 @@ if __name__ == '__main__':
         print('Average dice score: ', average_dice_score)
 
         print(f'Model hyperparams: Loss: {args.loss}, Lambda: {args.lambda_param}, Gamma: {args.gamma_param}, Learning rate: {args.learning_rate} - Average dice score: {average_dice_score}')
-        np.save(f'voxelmorph/tensorboard/Semisupervised/Metrics/Dice_hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}.npy', np.array(dice_scores))
+        np.save(f'vxlmorph/tensorboard/Semisupervised/Metrics/Dice_hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}.npy', np.array(dice_scores))
         
         print('\n---------------------------------------------------------------------------------------------------------\n')

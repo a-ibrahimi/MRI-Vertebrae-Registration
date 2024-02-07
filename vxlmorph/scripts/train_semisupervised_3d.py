@@ -1,17 +1,24 @@
 import argparse
 import datetime
 
+import voxelmorph as vxm
+from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
+
 import tensorflow as tf
 import numpy as np
 
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-from generators import *
-
-from voxelmorph.tf.networks import VxmDense, VxmDenseSemiSupervisedSeg
-import voxelmorph as vxm
 
 import configparser
+
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
+import vxlmorph.generators as generators
+
 
 if __name__ == '__main__':
     
@@ -72,9 +79,9 @@ if __name__ == '__main__':
 
     labels = np.load(args.labels)
 
-    train_gen = semisupervised(x_train, segmentations_train, labels=labels, batch_size=args.batch_size)
-    val_gen = semisupervised(x_val, segmentations_val, labels=labels,batch_size=args.batch_size)
-    test_gen = semisupervised(x_test, segmentations_test, labels=labels,batch_size=args.batch_size)
+    train_gen = generators.semisupervised(x_train, segmentations_train, labels=labels, batch_size=args.batch_size)
+    val_gen = generators.semisupervised(x_val, segmentations_val, labels=labels,batch_size=args.batch_size)
+    test_gen = generators.semisupervised(x_test, segmentations_test, labels=labels,batch_size=args.batch_size)
     
     # create model
     nf_enc=[16, 32, 64, 128]
@@ -109,7 +116,7 @@ if __name__ == '__main__':
     # compile model
     print('Compiling model...')
     with tf.device('/GPU:0'):
-        log_dir = "voxelmorph/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        log_dir = "vxlmorph/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
         early_stopping = EarlyStopping(monitor='val_loss', patience = args.patience, restore_best_weights=True)
         vxm_model.compile(tf.keras.optimizers.Adam(learning_rate=args.learning_rate), loss=losses, loss_weights=loss_weights)
