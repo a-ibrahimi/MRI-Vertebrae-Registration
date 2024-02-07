@@ -1,5 +1,5 @@
 import numpy as np
-from affine_transformation import AffineTransformer
+from vxlmorph.affine_transformation import AffineTransformer
 
 def volgen(
     vol_names,
@@ -48,7 +48,7 @@ def volgen(
         # load volumes and concatenate
         vols = vol_names[indices, ..., np.newaxis]
         
-        if(segs):
+        if(segs is not None):
             seg = segs[indices, ..., np.newaxis]
 
         yield vols, seg
