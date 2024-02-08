@@ -12,9 +12,9 @@ def volgen(
     This function generates batches of random volumes and, optionally, their corresponding segmentations.
 
     Parameters:
-    - vol_names (numpy.ndarray): List of volume names, paths, or preloaded volumes.
+    - vol_names (numpy.ndarray): List of preloaded volumes.
     - batch_size (int, optional): Number of volumes to generate in each batch. Default is 1.
-    - segs (numpy.ndarray or None, optional): List of segmentation names, paths, or preloaded segmentations.
+    - segs (numpy.ndarray or None, optional): List of preloaded segmentations.
       If provided, corresponding segmentations will be loaded and yielded with volumes. Default is None.
 
     Yields:
@@ -54,6 +54,26 @@ def volgen(
         yield vols, seg
         
 def semisupervised(vol_names, seg_names, labels, batch_size=16, downsize=1):
+    """
+    Generates a batch of data for training a semi-supervised 3D image registration model.
+
+    Args:
+        vol_names (numpy.ndarray): List of preloaded scans.
+        seg_names (numpy.ndarray): List of preloaded segmentation masks.
+        labels (numpy.ndarray): List of labels corresponding to segmentation classes.
+        batch_size (int, optional): Batch size. Defaults to 16.
+        downsize (int, optional): Downsize factor for the segmentation. Defaults to 1.
+
+    Yields:
+        tuple: A tuple containing two lists - input volumes and corresponding output volumes.
+            Input volume contains three elements: moving volume, fixed volume, and segmentation.
+            Ouput volume contains three elements: fixed volume, zero field, and segmentation
+
+    Note:
+        - The function uses a base generator (`volgen`) to load source and target volumes along with segmentation masks.
+        - The segmentation masks are converted to probability segmentation using the specified labels.
+        - The function yields batches of input volumes and corresponding target volumes for training.
+    """
     
     # configure base generator
     gen = volgen(vol_names, segs=seg_names, batch_size=batch_size)
