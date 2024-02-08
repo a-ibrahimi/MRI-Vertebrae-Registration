@@ -1,3 +1,10 @@
+"""
+This script visualizes hyperparameter search results after running hyper_search.sh. It will pick up the hyperparameters
+and make a plot. The best hyperparameter setting will be marked with a red star and the loss function will be labeled accordingly.
+This will save time and effort in finding the best hyperparameters for the model. It can be easily extended to include more
+hyperparameters by adjusting the pattern or regex. The script can be run from the command line or imported as a module.
+"""
+
 import pandas as pd
 import re
 import matplotlib.pyplot as plt
