@@ -26,14 +26,14 @@ Configuration details are loaded from the 'config.ini' file.
 import argparse
 import datetime
 
+import voxelmorph as vxm
+from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
+
 import tensorflow as tf
 import numpy as np
 
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-
-from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
-import voxelmorph as vxm
 
 import configparser
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read(config_path)
 
-    training_params = config['Semi2DTrainingParameters']
+    training_params = config['Semi2DAffineTrainingParameters']
 
     # Parsing command line arguments
     parser = argparse.ArgumentParser(description='Process model parameters.')
