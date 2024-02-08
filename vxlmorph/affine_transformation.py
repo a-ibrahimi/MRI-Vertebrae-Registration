@@ -23,8 +23,7 @@ def calculate_centroids(seg):
 
     return centroids
     
-def get_corresponding_points(
-    moving_centroids, fixed_centroids):
+def get_corresponding_points(moving_centroids, fixed_centroids):
     """
     Get corresponding points from two sets of centroids.
         
