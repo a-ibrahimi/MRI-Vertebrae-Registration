@@ -132,9 +132,7 @@ def semisupervised_affine(vol_names, seg_names, labels, batch_size=16, downsize=
             dim = 3
         else:
             dim = 2
-        print(dim)
         prob_seg = np.zeros((*seg.shape[:dim+1], len(labels)))
-        print(prob_seg.shape)
         for i, label in enumerate(labels):
             prob_seg[0, ..., i] = (seg[0, ..., 0] == label)
         return prob_seg[:, ::downsize, ::downsize]
@@ -175,8 +173,6 @@ def vxm_data_generator_affine(x_data, seg_data=None, batch_size=16):
     Yields:
     - tuple: A tuple containing the generated volumes.
     """
-
-    affine_transformer = AffineTransformer()
 
     # preliminary sizing
     vol_shape = x_data.shape[1:] # extract data shape

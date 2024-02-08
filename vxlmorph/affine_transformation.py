@@ -2,7 +2,7 @@ from scipy.ndimage import center_of_mass, affine_transform
 import cv2
 import numpy as np
 
-def calculate_centroids(self, seg):
+def calculate_centroids(seg):
     """
     Calculate the centroids of the input segmentation.
         
@@ -23,7 +23,8 @@ def calculate_centroids(self, seg):
 
     return centroids
     
-def get_corresponding_points(self, moving_centroids, fixed_centroids):
+def get_corresponding_points(
+    moving_centroids, fixed_centroids):
     """
     Get corresponding points from two sets of centroids.
         
@@ -44,7 +45,7 @@ def get_corresponding_points(self, moving_centroids, fixed_centroids):
 
     return moving_points, fixed_points
     
-def calculate_affine_transformations(self, moving_segs, fixed_segs, volumetric=False):
+def calculate_affine_transformations(moving_segs, fixed_segs, volumetric=False):
 
     """
     Calculates affine transformation matrices based on the centroids of the input masks.
@@ -75,10 +76,10 @@ def calculate_affine_transformations(self, moving_segs, fixed_segs, volumetric=F
         fixed_seg = fixed_segs[i, ...] 
         
         # Calculate the centroids of the moving and fixed masks
-        moving_centroids = self.calculate_centroids(moving_seg)
-        fixed_centroids = self.calculate_centroids(fixed_seg)
+        moving_centroids = calculate_centroids(moving_seg)
+        fixed_centroids = calculate_centroids(fixed_seg)
 
-        moving_points, fixed_points = self.get_corresponding_points(moving_centroids, fixed_centroids) # Get corresponding points
+        moving_points, fixed_points = get_corresponding_points(moving_centroids, fixed_centroids) # Get corresponding points
         
         # Reverse the points to match the input format of the cv2.estimateAffinePartial2D function
         for i in range(len(moving_points)):
@@ -97,7 +98,7 @@ def calculate_affine_transformations(self, moving_segs, fixed_segs, volumetric=F
         affine_matrices.append(M)
     return affine_matrices, moving_points_list, fixed_points_list
     
-def apply_affine_transformations(self, moving_images, affine_matrices, volumetric=False):
+def apply_affine_transformations(moving_images, affine_matrices, volumetric=False):
     """
     Applies affine transformations to the input images.
         
