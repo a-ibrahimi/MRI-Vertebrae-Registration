@@ -29,7 +29,7 @@
 
 ## Project Description
 
-This repository is dedicated to the exploration and implementation of deep learning models for image registration of vertebrae, as part of the practical class "Advanced Deep Learning in Medicine." The project focuses initially on the application of Voxelmorph to spine MRI and CT scans.
+This repository is dedicated to the exploration and implementation of deep learning models for image registration of vertebrae, as part of the practical class "Advanced Deep Learning in Medicine". The project focuses initially on the application of Voxelmorph to spine MRI and CT scans.
 
 The primary emphasis lies in training models for intra-modality registration within the same modality (MR). As the project evolves, the scope will extend to cover inter-patient intra-modality registration, specifically targeting MRI sequences such as T1w and T2w.
 
