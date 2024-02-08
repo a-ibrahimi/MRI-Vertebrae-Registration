@@ -1,3 +1,28 @@
+"""
+Script: train_semisupervised_affine_2d.py
+
+Description:
+This script trains a semi-supervised 2D image segmentation model using Voxelmorph and affine transformations.
+It utilizes command line arguments and configurations from the 'config.ini' file.
+
+Dependencies:
+- argparse
+- datetime
+- voxelmorph
+- tensorflow
+- numpy
+- sklearn
+- keras
+- configparser
+- sys
+- os
+
+Usage:
+Run this script to train a semi-supervised 2D image segmentation model using affine transformations with specified
+parameters. The model is based on Voxelmorph and uses TensorFlow as the backend.
+Configuration details are loaded from the 'config.ini' file.
+"""
+
 import argparse
 import datetime
 
@@ -6,12 +31,18 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-from generators import *
 
 from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
 import voxelmorph as vxm
 
 import configparser
+
+import sys
+import os
+
+sys.path.append(os.getcwd())
+
+import vxlmorph.generators as generators
 
 if __name__ == '__main__':
 
@@ -77,9 +108,9 @@ if __name__ == '__main__':
 
     labels = np.load(args.labels)
 
-    train_gen = semisupervised_affine(x_train, seg_train, labels=labels, batch_size=args.batch_size)
-    val_gen = semisupervised_affine(x_val, seg_val, labels=labels, batch_size=args.batch_size)
-    test_gen = semisupervised_affine(x_test, seg_test, labels=labels ,batch_size=args.batch_size)
+    train_gen = generators.semisupervised_affine(x_train, seg_train, labels=labels, batch_size=args.batch_size)
+    val_gen = generators.semisupervised_affine(x_val, seg_val, labels=labels, batch_size=args.batch_size)
+    test_gen = generators.semisupervised_affine(x_test, seg_test, labels=labels ,batch_size=args.batch_size)
 
     nf_enc=[14, 28, 144, 320]
     nf_dec=[1152, 1152, 320, 144, 28, 14, 14]
