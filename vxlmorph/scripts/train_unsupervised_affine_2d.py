@@ -1,8 +1,8 @@
 """
-Script: train_semisupervised_affine_2d.py
+Script: train_unsupervised_affine_2d.py
 
 Description:
-This script trains a semi-supervised 2D image segmentation model using Voxelmorph and affine transformations.
+This script trains a unsupervised 2D image segmentation model using Voxelmorph and affine transformations.
 It utilizes command line arguments and configurations from the 'config.ini' file.
 
 Dependencies:
@@ -18,7 +18,7 @@ Dependencies:
 - os
 
 Usage:
-Run this script to train a semi-supervised 2D image segmentation model using affine transformations with specified
+Run this script to train a unsupervised 2D image segmentation model using affine transformations with specified
 parameters. The model is based on Voxelmorph and uses TensorFlow as the backend.
 Configuration details are loaded from the 'config.ini' file.
 """
@@ -26,14 +26,14 @@ Configuration details are loaded from the 'config.ini' file.
 import argparse
 import datetime
 
+import voxelmorph as vxm
+from voxelmorph.tf.networks import VxmDense
+
 import tensorflow as tf
 import numpy as np
 
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-
-from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
-import voxelmorph as vxm
 
 import configparser
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     parser.add_argument('--images_path', type=str, default=training_params['images_path'], help='Path to npy file containing the MRI scans as numpy array')
     parser.add_argument('--segmentations_path', type=str, default=training_params['segmentations_path'], help='Path to npy file containing the segmentation masks as numpy array')
     parser.add_argument('--weights_path', type=str, default=training_params['weights_path'], help='Path to save model weights')
-    parser.add_argument('--labels', type=str, default=training_params['labels'], help='label list (npy format) to use in dice loss')
+
     parser.add_argument('--patience', type=int, default=training_params['patience'], help='Number of epochs with no improvement in validation performance after which training will be stopped.')
 
 
@@ -108,15 +108,15 @@ if __name__ == '__main__':
 
     labels = np.load(args.labels)
 
-    train_gen = generators.semisupervised_affine(x_train, seg_train, labels=labels, batch_size=args.batch_size)
-    val_gen = generators.semisupervised_affine(x_val, seg_val, labels=labels, batch_size=args.batch_size)
-    test_gen = generators.semisupervised_affine(x_test, seg_test, labels=labels ,batch_size=args.batch_size)
+    train_gen = generators.vxm_data_generator_affine(x_train, seg_train, batch_size=args.batch_size)
+    val_gen = generators.vxm_data_generator_affine(x_val, seg_val, batch_size=args.batch_size)
+    test_gen = generators.vxm_data_generator_affine(x_test, seg_test, batch_size=args.batch_size)
 
     nf_enc=[14, 28, 144, 320]
     nf_dec=[1152, 1152, 320, 144, 28, 14, 14]
 
     inshape = next(train_gen)[0][0].shape[1:-1]
-    vxm_model = VxmDenseSemiSupervisedSeg(inshape=inshape, nb_labels=len(labels), seg_resolution=1, int_steps=args.int_steps, nb_unet_features=[nf_enc, nf_dec])
+    vxm_model = VxmDense(inshape=inshape, nb_unet_features=[nf_enc, nf_dec], int_steps=args.int_steps)
     # define lossls
     if args.loss == 'MSE':
         loss_func = vxm.losses.MSE().loss
@@ -164,13 +164,11 @@ if __name__ == '__main__':
             #Save input as npy
             np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Moving/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[0])
             np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Fixed/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[1])
-            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_input/Moving_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_input[2])
             test_pred = vxm_model.predict(test_input, verbose=args.verbose)
             
             #Save output as npy
             np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Moved/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[0])
             np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Field/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[1])
-            np.save(f'vxlmorph/tensorboard/Semisupervised/Evaluation_output/Fixed_Seg/hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}_{i}.npy', test_pred[2])
             
             test_input = tf.convert_to_tensor(test_input[1], dtype=tf.float32)
             test_pred = tf.convert_to_tensor(test_pred[0], dtype=tf.float32)
@@ -183,3 +181,5 @@ if __name__ == '__main__':
         np.save(f'vxlmorph/tensorboard/Semisupervised/Metrics/Dice_hyper1{args.loss}_{args.gamma_param}_{args.lambda_param}_{args.learning_rate}.npy', np.array(dice_scores))
         
         print('\n---------------------------------------------------------------------------------------------------------\n')
+
+

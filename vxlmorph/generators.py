@@ -1,5 +1,6 @@
 import numpy as np
-from vxlmorph.affine_transformation import AffineTransformer
+
+import vxlmorph.affine_transformation as affine_transformation
 
 def volgen(
     vol_names,
@@ -104,33 +105,51 @@ def semisupervised(vol_names, seg_names, labels, batch_size=16, downsize=1):
         
         yield (invols, outvols)
     
-def semisupervised_affine(vol_names, seg_names, labels, batch_size, downsize):
+def semisupervised_affine(vol_names, seg_names, labels, batch_size=16, downsize=1, volumetric=False):
+    """
+    Semi-supervised Data Generator with Affine Transformations.
 
-    affine_transformer = AffineTransformer()
+    Parameters:
+    - vol_names (numpy.ndarray): List of volume names, paths, or preloaded volumes.
+    - seg_names (numpy.ndarray): List of segmentation names, paths, or preloaded segmentations.
+    - labels (list): List of labels to consider in the segmentation.
+    - batch_size (int): Number of volumes to generate in each batch.
+    - downsize (int): Downsize factor for the segmentation.
+    - volumetric (bool): Indicates the given data type, True for 3D. (default is False)
+    
+    Yields:
+    - tuple: A tuple containing the generated volumes and, if segs is provided, their corresponding segmentations.
+    """
 
     # configure base generator
     gen = volgen(vol_names, batch_size, seg_names)
     zeros = None
 
     # internal utility to generate downsampled prob seg from discrete seg
-    def split_seg(seg):
-        prob_seg = np.zeros((*seg.shape[:4], len(labels)))
+    def split_seg(seg, volumetric=False):
+        print(seg.shape)
+        if volumetric:
+            dim = 3
+        else:
+            dim = 2
+        print(dim)
+        prob_seg = np.zeros((*seg.shape[:dim+1], len(labels)))
+        print(prob_seg.shape)
         for i, label in enumerate(labels):
-            prob_seg[0, ..., i] = (seg[0, ...] == label)
+            prob_seg[0, ..., i] = (seg[0, ..., 0] == label)
         return prob_seg[:, ::downsize, ::downsize]
 
     while True:
         # load source vol and seg
         src_vol, src_seg = next(gen)
         trg_vol, trg_seg = next(gen)
-
+        
         # calculate affine transformations and transform source vol and seg
-        affine_matrices, _, __ = affine_transformer.calculate_affine_transformations(src_seg, trg_seg)
-        src_vol_tr = affine_transformer.apply_affine_transformations(src_vol, affine_matrices)
-        src_seg_tr = affine_transformer.apply_affine_transformations(src_seg, affine_matrices)
-
-        src_seg_tr = split_seg(src_seg_tr)
-        trg_seg = split_seg(trg_seg)
+        affine_matrices, _, __ = affine_transformation.calculate_affine_transformations(src_seg, trg_seg, volumetric=volumetric)
+        src_vol_tr = affine_transformation.apply_affine_transformations(src_vol, affine_matrices, volumetric=volumetric)
+        src_seg_tr = affine_transformation.apply_affine_transformations(src_seg, affine_matrices, volumetric=volumetric)
+        src_seg_tr = split_seg(src_seg_tr, volumetric=volumetric)
+        trg_seg = split_seg(trg_seg, volumetric=volumetric)
 
         vol_shape = src_vol.shape[1:]
         ndims = len(vol_shape)
@@ -145,6 +164,17 @@ def semisupervised_affine(vol_names, seg_names, labels, batch_size, downsize):
         yield (invols, outvols)
     
 def vxm_data_generator_affine(x_data, seg_data=None, batch_size=16):
+    """
+    Data Generator with Affine Transformations.
+    
+    Parameters:
+    - x_data (numpy.ndarray): Input data.
+    - seg_data (numpy.ndarray or None): Segmentation data. Default is None.
+    - batch_size (int): Number of volumes to generate in each batch.
+
+    Yields:
+    - tuple: A tuple containing the generated volumes.
+    """
 
     affine_transformer = AffineTransformer()
 
@@ -169,8 +199,8 @@ def vxm_data_generator_affine(x_data, seg_data=None, batch_size=16):
             moving_segs = seg_data[idx1, ..., np.newaxis]
             fixed_segs = seg_data[idx2, ..., np.newaxis]
 
-            affine_matrices, _, __ = affine_transformer.calculate_affine_transformations(moving_segs, fixed_segs)
-            translated_images = affine_transformer.apply_affine_transformations(moving_images, affine_matrices)
+            affine_matrices, _, __ = affine_transformation.calculate_affine_transformations(moving_segs, fixed_segs)
+            translated_images = affine_transformation.apply_affine_transformations(moving_images, affine_matrices)
 
             inputs = [translated_images, fixed_images]
         else:
