@@ -1,20 +1,23 @@
 import os
-import argparse
+import sys
 
+current_script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.join(current_script_dir, '..', '..', '')
+if parent_dir not in sys.path:
+    sys.path.append(parent_dir)
+
+import argparse
 import nibabel as nib
 import neurite as ne
 import voxelmorph as vxm
 from voxelmorph.tf.networks import VxmDense
-
 import numpy as np
 import tensorflow as tf
 from scipy.ndimage import zoom
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-
 import BIDS
 from BIDS import *
-
 import configparser
 
 def get_orientation(img):
