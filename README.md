@@ -51,7 +51,7 @@ Prior to model development, a robust preprocessing pipeline was crucial. This in
 
 ### Model Progression
 
-The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance.
+The baseline model was progressively refined and expanded to increase complexity. Different strategies were employed to enhance registration accuracy and overall performance. The baseline model was further scaled up to construct a more capable and robust model with expanding network architectures.
 
 #### Semisupervised Learning
 
@@ -67,7 +67,7 @@ In an experimental phase, we focused on using only the Region of Interest (ROI) 
 
 ### Still a Work in Progress
 
-Currently expermenting with spatially-variant and adaptive regularization.
+Currently expermenting with spatially-variant and adaptive regularization. A horizontal comparison with TransMorph is also a work in the future. Based on the previous research, the baseline model had a comparable performance with TransMorph on the same dataset without any other preprocessing.
 
 ## Requirements
 
