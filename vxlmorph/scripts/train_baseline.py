@@ -1,3 +1,12 @@
+"""
+This script works as following
+1. trains a 2D baseline model using the VoxelMorph library on 2D slices of MRI images;
+2. uses the VxmDense model from the VoxelMorph library, and the training data is generated using the vxm_data_generator function;
+3. defines the plot_history function to plot the training history, and the generate_2d_slices and resample functions to generate 2D slices from the dataset;
+4. the training parameters are read from the config file, and the model is compiled and trained using the training parameters;
+5. the model weights are saved, and the model is evaluated and demonstrated on a sample image.
+"""
+
 import os
 import sys
 
