@@ -1,34 +1,53 @@
+"""
+Script: train_semisupervised_3d.py
+
+Description:
+This script trains a semi-supervised 3D image segmentation model using Voxelmorph.
+It utilizes command line arguments and configurations from the 'config.ini' file.
+
+Dependencies:
+- argparse
+- datetime
+- voxelmorph
+- tensorflow
+- numpy
+- sklearn
+- keras
+- configparser
+- sys
+- os
+
+Usage:
+Run this script to train a semi-supervised 3D image segmentation model with specified
+parameters. The model is based on Voxelmorph and uses TensorFlow as the backend.
+Configuration details are loaded from the 'config.ini' file.
+"""
+
 import argparse
 import datetime
-
 import voxelmorph as vxm
 from voxelmorph.tf.networks import VxmDenseSemiSupervisedSeg
-
 import tensorflow as tf
 import numpy as np
-
 from sklearn.model_selection import train_test_split
 from keras.callbacks import EarlyStopping
-
 import configparser
-
 import sys
 import os
 
 sys.path.append(os.getcwd())
-
 import vxlmorph.generators as generators
 
-
 if __name__ == '__main__':
-    
+    # Read configuration file
     config_path = 'config.ini'
     config = configparser.ConfigParser()
     config.read(config_path)
-    
+
+    # Extract training parameters from configuration
     training_params = config['Semi3DTrainingParameters']
-    
-    # Parsing command line arguments
+
+    # Parse command line arguments
     parser = argparse.ArgumentParser(description='Process model parameters.')
     parser.add_argument('--slice_number', type=int, default=int(training_params['slice_number']), help='Number for generate_2d_slices function')
     parser.add_argument('--batch_size', type=int, default=int(training_params['batch_size']), help='Batch size for data generators')
@@ -52,45 +71,46 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
-    
-    # Specify GPU device and allow memory growth
+
+    # Set up GPU device and allow memory growth
     physical_devices = tf.config.list_physical_devices('GPU')
     if len(physical_devices) > 0:
         for gpu in physical_devices:
             tf.config.experimental.set_memory_growth(gpu, True)
-        print(f" {len(physical_devices)} GPU(s) is/are available")
+        print(f"{len(physical_devices)} GPU(s) is/are available")
     else:
-        print("No GPU detected")    
-    
+        print("No GPU detected")
+
+    # Load MRI scans and segmentations
     all_images = np.load(args.images_path)
     all_seg = np.load(args.segmentations_path)
-    
     images = all_images[:args.slice_number]
     seg = all_seg[:args.slice_number]
-    
+
+    # Normalize images
     images = (images - np.min(images)) / (np.max(images) - np.min(images))
-    
-    # split data
+
+    # Split data into train, validation, and test sets
     x_train, x_other = train_test_split(images, test_size=args.test_size_1, random_state=42)
     x_test, x_val = train_test_split(x_other, test_size=args.test_size_2, random_state=42)
-    
+
     segmentations_train, segmentation_other = train_test_split(seg, test_size=args.test_size_1, random_state=42)
     segmentations_test, segmentations_val = train_test_split(segmentation_other, test_size=args.test_size_2, random_state=42)
 
     labels = np.load(args.labels)
 
+    # Create data generators
     train_gen = generators.semisupervised(x_train, segmentations_train, labels=labels, batch_size=args.batch_size)
-    val_gen = generators.semisupervised(x_val, segmentations_val, labels=labels,batch_size=args.batch_size)
-    test_gen = generators.semisupervised(x_test, segmentations_test, labels=labels,batch_size=args.batch_size)
-    
-    # create model
-    nf_enc=[16, 32, 64, 128]
-    nf_dec=[128, 64, 64, 32, 32, 16, 16]
-    
+    val_gen = generators.semisupervised(x_val, segmentations_val, labels=labels, batch_size=args.batch_size)
+    test_gen = generators.semisupervised(x_test, segmentations_test, labels=labels, batch_size=args.batch_size)
+
+    # Define model architecture
+    nf_enc = [16, 32, 64, 128]
+    nf_dec = [128, 64, 64, 32, 32, 16, 16]
     inshape = next(train_gen)[0][0].shape[1:-1]
-    
     vxm_model = VxmDenseSemiSupervisedSeg(inshape=inshape, nb_labels=len(labels), seg_resolution=1, int_steps=args.int_steps, nb_unet_features=[nf_enc, nf_dec])
-    # define lossls
+
+    # Define loss functions
     if args.loss == 'MSE':
         loss_func = vxm.losses.MSE().loss
     elif args.loss == 'NCC':
@@ -101,31 +121,35 @@ if __name__ == '__main__':
         loss_func = vxm.losses.TukeyBiweight().loss
     else:
         loss_func = vxm.losses.MSE().loss
-    # define grad
+
+    # Define grad norm
     if args.grad_norm_type == 'l1':
         grad_norm = 'l1'
     elif args.grad_norm_type == 'l2':
         grad_norm = 'l2'
     else:
         grad_norm = 'l2'
-    # Add more elif blocks here for other loss types if needed
+
+    # Specify losses and loss weights
     losses = [loss_func, vxm.losses.Grad(grad_norm).loss, vxm.losses.Dice().loss]
     loss_weights = [1, args.lambda_param, args.gamma_param]
-    
-    
-    # compile model
+
+    # Compile model
     print('Compiling model...')
     with tf.device('/GPU:0'):
         log_dir = "vxlmorph/tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
-        early_stopping = EarlyStopping(monitor='val_loss', patience = args.patience, restore_best_weights=True)
+        early_stopping = EarlyStopping(monitor='val_loss', patience=args.patience, restore_best_weights=True)
         vxm_model.compile(tf.keras.optimizers.Adam(learning_rate=args.learning_rate), loss=losses, loss_weights=loss_weights)
-        # train and validate model
+
+        # Train and validate model
         print(f'Training model with hyperparams: Loss: {args.loss}, Lambda: {args.lambda_param}, Gamma: {args.gamma_param}, Learning rate: {args.learning_rate}')
         vxm_model.fit(train_gen, steps_per_epoch=args.steps_per_epoch, epochs=args.nb_epochs, validation_data=val_gen, validation_steps=args.steps_per_epoch, verbose=args.verbose, callbacks=[tensorboard_callback, early_stopping])
-        # save model
+
+        # Save model weights
         print('Saving model...')
         vxm_model.save_weights(args.weights_path)
-        # evaluate or test model
+
+        # Evaluate or test model
         print('Evaluating model...')
         vxm_model.evaluate(test_gen, steps=args.steps_per_epoch, verbose=args.verbose)
